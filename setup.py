@@ -1,3 +1,5 @@
+"""Setup for blit"""
+
 from os import path
 
 from setuptools import find_packages, setup
@@ -9,14 +11,16 @@ with open(path.join(PROJECT_ROOT, "README.md"), encoding="utf-8") as f:
 
 requires_extra = {
     "dev": ["GitPython", "pylint", "black"],
-    "optional": [""Jinja2",],
+    "optional": [
+        "Jinja2",
+    ],
 }
 requires_extra["all"] = [m for v in requires_extra.values() for m in v]
 
 setup(
-    name="rengu",
+    name="blit",
     version="6.0",
-    description="Compainion to Rengu used for managing binary objects",
+    description="Companion to Rengu used for managing binary objects",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://prajna.io",
@@ -28,11 +32,18 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     packages=find_packages(),
-    install_requires=["Click",],
+    install_requires=[
+        "Click",
+    ],
     extras_require=requires_extra,
     entry_points={
         "console_scripts": [
-            "blit=blit.cli:main",
+            "blit=blit.cli:cli",
         ],
+        "blit_cli": [
+            "info = blit.cli.info:info",
+        ],
+        "blit_store": [],
+        "blit_metadata": [],
     },
 )
