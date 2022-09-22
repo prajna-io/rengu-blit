@@ -32,9 +32,7 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     packages=find_packages(),
-    install_requires=[
-        "Click",
-    ],
+    install_requires=["Click", "cmd2"],
     extras_require=requires_extra,
     entry_points={
         "console_scripts": [
