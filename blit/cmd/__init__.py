@@ -18,34 +18,14 @@ common_arguments.add_argument("-v", "--verbose", action="count", help="Rengu bas
 common_arguments.add_argument("-B", "--base", action="store", help="Rengu base")
 # endregion
 
-
-from functools import wraps
-
-
-def add_method(cls):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            return func(*args, **kwargs)
-
-        setattr(cls, func.__name__, wrapper)
-        # Note we are not binding func, but wrapper which accepts self but does exactly the same as func
-        return func  # returning func means func can still be used normally
-
-    return decorator
+import types
 
 
-class DynamicCmd:
-    """DynamicCmd add-on"""
-
-    def __new__(cls, *args, **kwargs):
-        print("Creating Instance")
-        instance = super().__new__(cls, *args, **kwargs)
-
-        instance.__dict__["do_foo"] = do_foo
-
-        pprint(instance.__dict__)
-        return instance
+@with_category("Configuration")
+@with_argparser(common_arguments)
+def do_foo(*args) -> bool:
+    """Do foo!"""
+    pprint(args)
 
 
 class BlitApp(Cmd):
@@ -55,6 +35,7 @@ class BlitApp(Cmd):
     prompt = "[blit] "
 
     def __init__(self, **kwargs):
+
         super().__init__(**kwargs)
 
         self.processes = []
@@ -65,6 +46,18 @@ class BlitApp(Cmd):
         """Provide basic information on the blit environment"""
         pprint(self.__dict__)
         self.poutput(args)
+
+    @with_category("Configuration")
+    def do_load_foo(self, statement: str) -> bool:
+        """load the foo module"""
+        setattr(self, "do_foo", types.MethodType(do_foo, self))
+
+    @with_category("Configuration")
+    def do_load_bar(self, statment: str) -> bool:
+        """load the bar module"""
+        import blit.cmd.more
+
+        self.register_command_set(blit.cmd.more.MoreCommands())
 
     job_arguments = deepcopy(common_arguments)
     job_arguments.add_argument(
@@ -133,10 +126,3 @@ class BlitApp(Cmd):
             sys.exit(app.onecmd(" ".join(sys.argv[1:])))
         else:
             sys.exit(app.cmdloop())
-
-
-@add_method(BlitApp)
-@with_category("Configuration")
-def do_foo(*args) -> bool:
-    """Do foo!"""
-    pprint(args)

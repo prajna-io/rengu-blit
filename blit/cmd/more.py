@@ -1,11 +1,14 @@
-from typing import Callable
-from cmd2 import Cmd, Cmd2ArgumentParser, with_argparser, with_category
+from pprint import pprint
+from cmd2 import CommandSet, with_default_category, with_argparser
+
+from . import common_arguments
 
 
-class AnotherFunction:
-    def __init__(self, cmd: Cmd):
-        self.cmd = cmd
+@with_default_category("more commands")
+class MoreCommands(CommandSet):
+    """more commands for blit"""
 
-    def __call__(self, statement: str) -> bool:
-        """command to do other things"""
-        self.cmd.poutput(f"ANother command {statement}")
+    @with_argparser(common_arguments)
+    def do_bar(self, *args) -> bool:
+        """Do bar!"""
+        pprint(args)
