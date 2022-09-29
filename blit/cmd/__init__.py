@@ -4,9 +4,11 @@
 # region imports
 
 from copy import deepcopy
+from typing import List, Tuple, Optional
+
 from pprint import pprint
 
-from cmd2 import Cmd, Cmd2ArgumentParser, with_argparser, with_category
+from cmd2 import Cmd, Cmd2ArgumentParser, with_argparser, with_category, constants
 
 
 # endregion
@@ -18,11 +20,11 @@ common_arguments.add_argument("-v", "--verbose", action="count", help="Rengu bas
 common_arguments.add_argument("-B", "--base", action="store", help="Rengu base")
 # endregion
 
-import types
+
 
 
 @with_category("Configuration")
-@with_argparser(common_arguments)
+@with_argparser(deepcopy(common_arguments))
 def do_foo(*args) -> bool:
     """Do foo!"""
     pprint(args)
@@ -39,9 +41,40 @@ class BlitApp(Cmd):
         super().__init__(**kwargs)
 
         self.processes = []
+        self.hidden_commands.append("-relative-run-script")
 
+    #region underscores to dashes
+    def get_all_commands(self) -> List[str]:
+        """Return a list of all commands"""
+        return [
+            name[len(constants.COMMAND_FUNC_PREFIX) :].replace("_", "-")
+            for name in self.get_names()
+            if name.startswith(constants.COMMAND_FUNC_PREFIX) and callable(getattr(self, name))
+        ]
+
+    def _cmd_func_name(self, command: str) -> str:
+        """Get the method name associated with a given command.
+        :param command: command to look up method name which implements it
+        :return: method name which implements the given command
+        """
+        target = constants.COMMAND_FUNC_PREFIX + command
+        target = target.replace("-", "_")
+        return target if callable(getattr(self, target, None)) else ''
+    
+    #endregion
+
+    @with_category("Testing Features")
+    @with_argparser(deepcopy(common_arguments))
+    def do_test_feature_one(self, args:Cmd2ArgumentParser) -> bool:
+        """Bubba!"""
+        print("test_feature_one")
+        print(args)
+    
+    def help_test_feature_one(self):
+        print("HELP")
+    
     @with_category("Configuration")
-    @with_argparser(common_arguments)
+    @with_argparser(deepcopy(common_arguments))
     def do_info(self, args: Cmd2ArgumentParser) -> bool:
         """Provide basic information on the blit environment"""
         pprint(self.__dict__)
